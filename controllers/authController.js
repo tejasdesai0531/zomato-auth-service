@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id,usertype) => {
+    return jwt.sign({ id,usertype }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     });
 };
@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    const { email, password,usertype } = req.body;
 
     try {
         let user = await User.findOne({ email });
@@ -27,11 +27,12 @@ exports.signup = async (req, res) => {
         user = new User({
             email,
             password,
+            usertype
         });
 
         await user.save();
 
-        const token = generateToken(user._id);
+        const token = generateToken(user._id,user.usertype);
 
         res.status(201).json({ token });
     } catch (error) {
@@ -50,6 +51,7 @@ exports.login = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
+        console.log("user>>>>>>>>>",user);
 
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -61,7 +63,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user._id,user.usertype);
 
         res.json({ token });
     } catch (error) {

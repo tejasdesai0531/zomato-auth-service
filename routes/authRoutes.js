@@ -8,6 +8,8 @@ router.post(
     [
         check('email', 'Please include a valid email').isEmail(),
         check('password', 'Password is required').exists(),
+        check('usertype', 'Usertype is required and must be one of customer, admin, restaurant, delivery').isIn(['customer', 'admin', 'restaurant', 'delivery']),
+
     ],
     signup
 );
